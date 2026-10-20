@@ -1,0 +1,211 @@
+@page "/"
+@using Stavemester.Game
+@inject IJSRuntime JS
+@inject HttpClient Http
+
+<PageTitle>Stavemester</PageTitle>
+
+<main class="game">
+    <header class="title">
+        <h1>Stavemester</h1>
+        <div class="title-buttons">
+            <button class="sound-btn" @onclick="ToggleSound"
+                    aria-label="@(_soundOn ? "Slå lyden fra" : "Slå lyden til")">
+                @(_soundOn ? "🔊" : "🔇")
+            </button>
+            <div class="stars" aria-label="@_stars stjerner">⭐ @_stars</div>
+        </div>
+    </header>
+
+    <nav class="levels" aria-label="Vælg niveau">
+        @foreach (var level in SpellingGame.Levels)
+        {
+            <button class="level-btn level-@level.Number @(level == _game.Level ? "active" : "")"
+                    @onclick="() => ChangeLevel(level)">
+                @level.Name
+                <small>@level.Description</small>
+            </button>
+        }
+    </nav>
+
+    <div class="play">
+        @if (_loadError is not null)
+        {
+            <p class="load-error">@_loadError</p>
+        }
+        else if (!_started)
+        {
+            @* Browsers only allow sound after a tap, so the first word waits for this one. *@
+            <button class="start-btn" @onclick="NextRound">▶ Start</button>
+        }
+        else if (_game.Current is { } word)
+        {
+            <section class="picture" @key="_round">
+                @if (word.IsImageFile)
+                {
+                    <img src="@word.ImageUrl" alt="" />
+                }
+                else
+                {
+                    <span class="emoji" aria-hidden="true">@word.Image</span>
+                }
+                @if (word.SoundUrl is not null)
+                {
+                    <button class="say-btn" @onclick="PlayWord" aria-label="Hør ordet">🗣️</button>
+                }
+            </section>
+
+            <section class="word-row">
+                <div class="boxes @(_game.IsSolved ? "solved" : "")" style="--letters:@word.Letters.Length">
+                    @for (var i = 0; i < word.Letters.Length; i++)
+                    {
+                        var index = i;
+                        var state = index < _game.Filled
+                            ? (index == 0 && _game.Level.ShowFirstLetter ? "given" : "filled")
+                            : index == _game.Filled ? "current" : "";
+                        <span class="box @state @(_game.HintAt == index ? "hint" : "")" style="--i:@index">
+                            @if (index < _game.Filled || _game.HintAt == index)
+                            {
+                                @word.Letters[index]
+                            }
+                        </span>
+                    }
+                </div>
+                <button class="hint-btn" @onclick="ShowHint" disabled="@_game.IsSolved"
+                        aria-label="Vis næste bogstav">?</button>
+            </section>
+
+            <section class="feedback" aria-live="polite">
+                @if (_game.IsSolved)
+                {
+                    <div class="message success">
+                        <span class="big-emoji">🎉</span>
+                        <span>Hurra! Du stavede @word.Letters!</span>
+                    </div>
+                    <button class="next-btn" @onclick="NextRound">Næste ➜</button>
+                }
+                else if (_wrongLetter is not null)
+                {
+                    <div class="message try-again" @key="_wrongCount">
+                        <span class="big-emoji">🤔</span>
+                        <span>Ups! Ikke @_wrongLetter. Prøv igen!</span>
+                    </div>
+                }
+            </section>
+
+            <section class="keyboard @(_game.IsSolved ? "done" : "")" aria-label="Bogstaver">
+                @foreach (var letter in SpellingGame.Alphabet)
+                {
+                    var isHint = _game.HintAt is not null && _game.NextLetter == letter;
+                    var isWrong = _wrongLetter == letter;
+                    <button class="key @(isHint ? "hint" : "") @(isWrong ? "wrong" : "")"
+                            @key="@(isWrong ? $"{letter}-{_wrongCount}" : letter.ToString())"
+                            @onclick="() => Type(letter)" disabled="@_game.IsSolved">
+                        @letter
+                    </button>
+                }
+            </section>
+        }
+    </div>
+</main>
+
+@code {
+    // The dictionary is edited by hand, so allow // and /* */ comments and a trailing comma.
+    private static readonly System.Text.Json.JsonSerializerOptions DictionaryJson =
+        new(System.Text.Json.JsonSerializerDefaults.Web)
+        {
+            ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip,
+            AllowTrailingCommas = true,
+        };
+
+    private readonly SpellingGame _game = new();
+    private char? _wrongLetter;
+    private int _wrongCount;
+    private int _round;
+    private int _stars;
+    private bool _soundOn = true;
+    private string? _loadError;
+    private bool _started;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var words = await Http.GetFromJsonAsync<List<WordEntry>>("ordbog.json", DictionaryJson) ?? [];
+            _game.SetWords(words);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or System.Text.Json.JsonException)
+        {
+            _loadError = "Ordbogen kunne ikke indlæses (ordbog.json).";
+            return;
+        }
+
+        if (!_game.HasWords) _loadError = "Ordbogen er tom.";
+    }
+
+    private void ChangeLevel(GameLevel level)
+    {
+        if (level == _game.Level) return;
+        _game.SetLevel(level);
+        _game.RestartWord();
+        _wrongLetter = null;
+    }
+
+    private async Task NextRound()
+    {
+        _started = true;
+        _game.NewRound();
+        _wrongLetter = null;
+        _round++;
+        await PlayWord();
+    }
+
+    private async Task Type(char letter)
+    {
+        if (_game.TryLetter(letter))
+        {
+            _wrongLetter = null;
+            if (_game.IsSolved)
+            {
+                _stars++;
+                await Play("success");
+            }
+            else
+            {
+                await Play("correctLetter");
+            }
+        }
+        else
+        {
+            _wrongLetter = letter;
+            _wrongCount++;
+            await Play("tryAgain");
+        }
+    }
+
+    private void ShowHint()
+    {
+        _game.Hint();
+        _wrongLetter = null;
+    }
+
+    private void ToggleSound() => _soundOn = !_soundOn;
+
+    private async Task PlayWord()
+    {
+        if (_game.Current?.SoundUrl is { } url) await Play("playFile", url);
+    }
+
+    private async Task Play(string sound, params object[] args)
+    {
+        if (!_soundOn) return;
+        try
+        {
+            await JS.InvokeVoidAsync($"gameSounds.{sound}", args);
+        }
+        catch (JSException)
+        {
+            // No audio support: the game still works without sound.
+        }
+    }
+}
