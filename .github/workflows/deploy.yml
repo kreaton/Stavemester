@@ -1,0 +1,54 @@
+name: Deploy Blazor WASM to GitHub Pages
+
+on:
+  push:
+    branches: [ "main" ] # Change to "master" if your default branch is master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x # Change to your .NET version (e.g., 8.0.x or 9.0.x)
+
+      - name: Publish .NET App
+        run: dotnet publish -c Release -o release
+
+      # GitHub Pages ignores folders starting with an underscore (like _framework) unless .nojekyll is present
+      - name: Add .nojekyll file
+        run: touch release/wwwroot/.nojekyll
+
+      # Essential for client-side routing so refreshing a subpage doesn't throw a 404 error
+      - name: Copy index.html to 404.html
+        run: cp release/wwwroot/index.html release/wwwroot/404.html
+
+      # Automatically fix the base href for GitHub subdirectories (e.g., username.github.io/repo-name/)
+      - name: Fix base href
+        run: |
+          TAG="<base href=\"/\" />"
+          REPLACE="<base href=\"/${{ github.event.repository.name }}/\" />"
+          find release/wwwroot -name "index.html" -type f -exec sed -i "s|$TAG|$REPLACE|g" {} +
+
+      - name: Upload artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: release/wwwroot
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
