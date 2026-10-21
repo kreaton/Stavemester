@@ -98,7 +98,8 @@
   },
   {
     "word": "mus",
-    "image": "🐭"
+    "image": "🐭",
+    "sound": "mus.mp3"
   },
   {
     "word": "fisk",
@@ -122,11 +123,13 @@
   },
   {
     "word": "abe",
-    "image": "🐒"
+    "image": "🐒",
+    "sound": "abe.mp3"
   },
   {
     "word": "sol",
-    "image": "☀️"
+    "image": "☀️",
+    "sound": "sol.mp3"
   },
   {
     "word": "bil",
@@ -145,20 +148,23 @@
   },
   {
     "word": "båd",
-    "image": "⛵"
+    "image": "⛵",
+    "sound": "baad.mp3"
   },
   {
     "word": "is",
     "image": "🍦",
-    "sound": "success.mp3"
+    "sound": "is.mp3"
   },
   {
     "word": "æg",
-    "image": "🥚"
+    "image": "🥚",
+    "sound": "aeg.mp3"
   },
   {
     "word": "ost",
-    "image": "🧀"
+    "image": "🧀",
+    "sound": "ost.mp3"
   },
   {
     "word": "bold",
@@ -167,23 +173,28 @@
   },
   {
     "word": "hus",
-    "image": "🏠"
+    "image": "🏠",
+    "sound": "hus.mp3"
   },
   {
     "word": "træ",
-    "image": "🌳"
+    "image": "🌳",
+    "sound": "trae.mp3"
   },
   {
     "word": "bog",
-    "image": "📖"
+    "image": "📖",
+    "sound": "bog.mp3"
   },
   {
     "word": "sko",
-    "image": "👟"
+    "image": "👟",
+    "sound": "sko.mp3"
   },
   {
     "word": "hat",
-    "image": "🎩"
+    "image": "🎩",
+    "sound": "hat.mp3"
   },
   {
     "word": "ur",
@@ -192,6 +203,7 @@
   },
   {
     "word": "øre",
-    "image": "👂"
+    "image": "👂",
+    "sound": "oere.mp3"
   }
 ]
