@@ -1,6 +1,7 @@
 name: Build and Deploy Blazor WASM to FTP
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ] # Change to "master" if your default branch is master
   workflow_dispatch: # Also allows a manual run from the Actions tab
