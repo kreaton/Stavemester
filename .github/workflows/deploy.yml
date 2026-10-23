@@ -1,6 +1,7 @@
 name: Deploy Stavemester Blazor WASM to GitHub Pages
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ] # Change to "master" if your default branch is master
 
