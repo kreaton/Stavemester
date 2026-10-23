@@ -3,10 +3,4 @@
   <Folder Name="/.github/workflows/">
     <File Path=".github/workflows/deploy.yml" />
   </Folder>
-  <Folder Name="/scripts/">
-    <File Path="scripts/Deploy-Ftp.ps1" />
-  </Folder>
-  <Folder Name="/src/">
-    <Project Path="src/Stavemester/Stavemester.csproj" />
-  </Folder>
 </Solution>
