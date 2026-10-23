@@ -10,15 +10,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x # The project targets net10.0
 
       - name: Publish .NET App
         run: dotnet publish src/Stavemester/Stavemester.csproj -c Release -o release
+
+      - name: Upload publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-output
+          path: release
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download publish artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-output
+          path: release
 
       # Uploads the publish output (web.config + wwwroot/), the same files the Visual Studio
       # FTP profile uploads. Only changed files are sent after the first run.
@@ -28,7 +44,8 @@ jobs:
       #   FTP_PASSWORD
       #   FTP_FOLDER    e.g. webroots/www/test  (no trailing slash)
       - name: Deploy to FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        #uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        uses: SamKirkland/FTP-Deploy-Action@v4
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
