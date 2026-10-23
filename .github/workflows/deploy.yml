@@ -1,8 +1,9 @@
-name: Deploy Blazor WASM to GitHub Pages
+name: Deploy Blazor WASM to FTP
 
 on:
   push:
     branches: [ "main" ] # Change to "master" if your default branch is master
+  workflow_dispatch: # Also allows a manual run from the Actions tab
 
 jobs:
   build:
@@ -14,41 +15,59 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x # Change to your .NET version (e.g., 8.0.x or 9.0.x)
+          dotnet-version: 10.0.x # The project targets net10.0
 
       - name: Publish .NET App
-        run: dotnet publish -c Release -o release
+        run: dotnet publish src/Stavemester/Stavemester.csproj -c Release -o release
 
-      # GitHub Pages ignores folders starting with an underscore (like _framework) unless .nojekyll is present
-      - name: Add .nojekyll file
-        run: touch release/wwwroot/.nojekyll
-
-      # Essential for client-side routing so refreshing a subpage doesn't throw a 404 error
-      - name: Copy index.html to 404.html
-        run: cp release/wwwroot/index.html release/wwwroot/404.html
-
-      # Automatically fix the base href for GitHub subdirectories (e.g., username.github.io/repo-name/)
-      - name: Fix base href
-        run: |
-          TAG="<base href=\"/\" />"
-          REPLACE="<base href=\"/${{ github.event.repository.name }}/\" />"
-          find release/wwwroot -name "index.html" -type f -exec sed -i "s|$TAG|$REPLACE|g" {} +
-
-      - name: Upload artifact for GitHub Pages
-        uses: actions/upload-pages-artifact@v3
+      # Uploads the publish output (web.config + wwwroot/), the same files the Visual Studio
+      # FTP profile uploads. Only changed files are sent after the first run.
+      # Repository secrets (Settings > Secrets and variables > Actions):
+      #   FTP_HOST      e.g. ftp.example.com
+      #   FTP_USERNAME
+      #   FTP_PASSWORD
+      #   FTP_FOLDER    e.g. webroots/www/test  (no trailing slash)
+      - name: Deploy to FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          path: release/wwwroot
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_FOLDER }}/
+          local-dir: ./release/
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      # ---- GitHub Pages deployment (disabled) ----
+
+      # # GitHub Pages ignores folders starting with an underscore (like _framework) unless .nojekyll is present
+      # - name: Add .nojekyll file
+      #   run: touch release/wwwroot/.nojekyll
+
+      # # Essential for client-side routing so refreshing a subpage doesn't throw a 404 error
+      # - name: Copy index.html to 404.html
+      #   run: cp release/wwwroot/index.html release/wwwroot/404.html
+
+      # # Automatically fix the base href for GitHub subdirectories (e.g., username.github.io/repo-name/)
+      # - name: Fix base href
+      #   run: |
+      #     TAG="<base href=\"/\" />"
+      #     REPLACE="<base href=\"/${{ github.event.repository.name }}/\" />"
+      #     find release/wwwroot -name "index.html" -type f -exec sed -i "s|$TAG|$REPLACE|g" {} +
+
+      # - name: Upload artifact for GitHub Pages
+      #   uses: actions/upload-pages-artifact@v3
+      #   with:
+      #     path: release/wwwroot
+
+  # deploy:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     pages: write
+  #     id-token: write
+  #   environment:
+  #     name: github-pages
+  #     url: ${{ steps.deployment.outputs.url }}
+  #   steps:
+  #     - name: Deploy to GitHub Pages
+  #       id: deployment
+  #       uses: actions/deploy-pages@v4

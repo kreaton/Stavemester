@@ -43,3 +43,29 @@ dotnet run --project src/Stavemester
 
 `src/Stavemester/Publish.bat` udgiver til `bin/Publish`. Ikonerne laves med
 `powershell -File tools\make-icons.ps1`.
+
+## Deploy til FTP
+
+**GitHub Actions:** `.github/workflows/deploy.yml` udgiver og uploader til FTP ved hvert push til
+`main` (eller manuelt fra fanen Actions). Den bruger repository secrets `FTP_HOST`,
+`FTP_USERNAME`, `FTP_PASSWORD` og `FTP_FOLDER` (fx `webroots/www/test`, uden `/` til sidst).
+
+**Kommandolinje** (ingen publish-profil nødvendig; adgangskoden spørges der om):
+
+```powershell
+pwsh scripts\Deploy-Ftp.ps1 -FtpHost ftp.example.com -User brugernavn -Folder webroots/www/test
+```
+
+Indstillingerne kan også komme fra miljøvariablerne `FTP_HOST`, `FTP_USERNAME`,
+`FTP_PASSWORD` og `FTP_FOLDER`. `-SkipPublish` uploader den sidste udgivelse uden at bygge igen.
+
+To andre måder at uploade på, med samme parametre og miljøvariabler:
+
+- `scripts\Deploy-Ftp-Scp.ps1` bruger [WinSCP](https://winscp.net) (skal være installeret) og
+  synkroniserer, så kun nye og ændrede filer uploades. `-WinScp <sti>` hvis `WinSCP.com` ikke findes
+  automatisk.
+- `tools/deploy-ftp` er et generelt Rust-program (se dens README):
+
+  ```powershell
+  cargo run --release --manifest-path tools/deploy-ftp/Cargo.toml -- --publish src/Stavemester/Stavemester.csproj --source src/Stavemester/bin/Publish --host ftp.example.com --user brugernavn --folder webroots/www/test
+  ```
