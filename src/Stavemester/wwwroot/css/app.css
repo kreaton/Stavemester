@@ -82,14 +82,16 @@ button:disabled { cursor: default; }
     grid-template-areas:
         "title"
         "levels"
-        "play";
+        "play"
+        "credits";
     align-content: center;
     gap: 0.9rem;
 }
 
-.title  { grid-area: title; }
-.levels { grid-area: levels; }
-.play   { grid-area: play; }
+.title   { grid-area: title; }
+.levels  { grid-area: levels; }
+.play    { grid-area: play; }
+.credits { grid-area: credits; }
 
 @media (min-aspect-ratio: 4/3) {
     .game {
@@ -97,7 +99,8 @@ button:disabled { cursor: default; }
         grid-template-columns: 12rem 1fr;
         grid-template-areas:
             "title title"
-            "levels play";
+            "levels play"
+            "credits credits";
         column-gap: 1.5rem;
     }
 }
@@ -436,6 +439,14 @@ button:disabled { cursor: default; }
 
 @media (min-aspect-ratio: 4/3) {
     .key { height: 4rem; }
+}
+
+/* ---------- Credits ---------- */
+
+.credits {
+    text-align: center;
+    font-size: 0.75rem;
+    opacity: .6;
 }
 
 /* ---------- Animations ---------- */
