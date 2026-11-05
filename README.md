@@ -1,6 +1,12 @@
 # Stavemester
 
-Stavespil for børn på 5–6 år (Blazor WebAssembly, .NET 10).
+![Blazor WebAssembly](https://img.shields.io/badge/Blazor-WebAssembly-lightgrey)
+![.NET 10](https://img.shields.io/badge/.NET-10-lightgrey)
+![Installable web app](https://img.shields.io/badge/PWA-installable-lightgrey)
+
+![Stavemester: stavespil for børn på 5-6 år](images/banner.png)
+
+**Stavespil for børn på 5–6 år.**
 
 Et billede vises sammen med en kasse pr. bogstav i ordet. Barnet trykker bogstaverne ind fra
 et stort tastatur (A–Å). Et forkert bogstav giver en besked og en lyd, `?` viser det næste
