@@ -480,3 +480,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Private family photos: kept locally only, never published
+src/Stavemester/wwwroot/images/*.jpg
