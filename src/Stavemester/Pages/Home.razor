@@ -2,6 +2,7 @@
 @using Stavemester.Game
 @inject IJSRuntime JS
 @inject HttpClient Http
+@implements IAsyncDisposable
 
 <PageTitle>Stavemester</PageTitle>
 
@@ -14,6 +15,7 @@
                 @(_soundOn ? "🔊" : "🔇")
             </button>
             <div class="stars" aria-label="@_stars stjerner">⭐ @_stars</div>
+            <a class="kg-home" href="../" aria-label="Alle spil" title="Alle spil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h4.5v-6h4v6h4.5V9.5" /></svg><span class="kg-text">Alle spil</span></a>
         </div>
     </header>
 
@@ -108,7 +110,7 @@
         }
     </div>
 
-    <footer class="credits"><a class="kg-home" href="../"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h4.5v-6h4v6h4.5V9.5" /></svg>Alle spil</a> Lavet med kærlighed 💛 (c) 2026 Per Hejndorf, Kreaton – @BuildInfo.Display</footer>
+    <footer class="credits">Lavet med kærlighed 💛 (c) 2026 Per Hejndorf, Kreaton – @BuildInfo.Display</footer>
 </main>
 
 @code {
@@ -128,6 +130,59 @@
     private bool _soundOn = true;
     private string? _loadError;
     private bool _started;
+    private DotNetObjectReference<Home>? _keyboardRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        _keyboardRef = DotNetObjectReference.Create(this);
+        await JS.InvokeVoidAsync("gameKeyboard.start", _keyboardRef);
+    }
+
+    /// <summary>A key from a physical keyboard (see wwwroot/js/keyboard.js): a letter, "Enter" or "?".</summary>
+    [JSInvokable]
+    public async Task OnKey(string key)
+    {
+        if (_loadError is not null || !_game.HasWords) return;
+
+        if (key == "Enter")
+        {
+            // Enter starts the game and moves on once a word is spelled.
+            if (_started && !_game.IsSolved) return;
+            await NextRound();
+        }
+        else if (!_started || _game.IsSolved)
+        {
+            return;
+        }
+        else if (key == "?")
+        {
+            ShowHint();
+        }
+        else if (key.Length == 1 && SpellingGame.Alphabet.Contains(key[0]))
+        {
+            await Type(key[0]);
+        }
+        else
+        {
+            return;
+        }
+
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("gameKeyboard.stop");
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is already gone.
+        }
+        _keyboardRef?.Dispose();
+    }
 
     protected override async Task OnInitializedAsync()
     {
