@@ -3,6 +3,7 @@
 ![Blazor WebAssembly](https://img.shields.io/badge/Blazor-WebAssembly-lightgrey)
 ![.NET 10](https://img.shields.io/badge/.NET-10-lightgrey)
 ![Installable web app](https://img.shields.io/badge/PWA-installable-lightgrey)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 ![Stavemester: stavespil for børn på 5-6 år](images/banner.png)
 
@@ -55,3 +56,9 @@ dotnet run --project src/Stavemester
 **GitHub Actions:** `.github/workflows/deploy.yml` udgiver ved hvert push til `main` (eller manuelt
 fra fanen Actions) og lægger spillet i mappen `stavemester/` på KidsGames' GitHub Pages:
 <https://kreaton.github.io/KidsGames/stavemester/>. Den bruger repository secret `PAGES_DEPLOY_KEY`.
+
+## License & Authorship
+
+This project is distributed under the terms of the [MIT License](LICENSE).
+
+**AI authorship note:** Most of the source code in this repository was generated with AI coding agents (Claude Code), under my direction and review. Purely AI-generated material may not be eligible for copyright protection in some jurisdictions. To the extent any part of this project is protected by copyright, it is licensed under the MIT License, and the license's warranty and liability disclaimers apply to the project as a whole.
