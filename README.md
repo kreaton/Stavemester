@@ -4,6 +4,9 @@
 ![.NET 10](https://img.shields.io/badge/.NET-10-lightgrey)
 ![Installable web app](https://img.shields.io/badge/PWA-installable-lightgrey)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/kreaton/Stavemester?style=flat&logo=github&color=yellow)](https://github.com/kreaton/Stavemester/stargazers)
+
+⭐ Hvis Stavemester fortjener en plads på din maskine, så [giv det en stjerne på GitHub](https://github.com/kreaton/Stavemester) — det er gratis, lavet af én udvikler, og stjerner er det, der får andre til at finde det.
 
 ![Stavemester: stavespil for børn på 5-6 år](images/banner.png)
 
