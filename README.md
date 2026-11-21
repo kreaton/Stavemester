@@ -12,6 +12,8 @@
 
 **Stavespil for børn på 5–6 år.**
 
+▶️ **Spil det:** <https://kreaton.github.io/KidsGames/stavemester/>
+
 Et billede vises sammen med en kasse pr. bogstav i ordet. Barnet trykker bogstaverne ind fra
 et stort tastatur (A–Å). Et forkert bogstav giver en besked og en lyd, `?` viser det næste
 bogstav (som barnet så selv skal finde på tastaturet), og et færdigt ord giver hurra.
